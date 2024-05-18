@@ -92,7 +92,7 @@ const setExcluirCategoria = async function(idCategoria){
     try {
 
         if(idCategoria == '' || idCategoria == undefined || idCategoria == null || isNaN(idCategoria)){
-            return config.ERROR_REQUIRED_FIELDS
+            return config.ERROR_INVALID_ID
         }else{
             let dadosCategoria = await categoriasDAO.deleteCategoria(idCategoria)
 

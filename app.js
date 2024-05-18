@@ -3,6 +3,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 
 const categoriasController = require('./controller/categorias_controller.js')
+const produtosController = require('./controller/produtos_controller.js')
 
 const app = express()
 
@@ -66,12 +67,73 @@ app.delete('/v1/baze/categoria/:id', cors(), async function(request, response, n
     response.status(200)
 })
 
-app.put('/v1/baze/atualizar/categoria/:id', jsonBodyParser, async function(request, response, next){
+app.put('/v1/baze/atualizar/categoria/:id', cors(), jsonBodyParser, async function(request, response, next){
 
     let idCategoria = request.params.id
     let contentType = request.headers['content-type']
     let dadosBody = request.body
     let resultDados = await categoriasController.setAtualizarCategoria(idCategoria, contentType, dadosBody)
+
+    response.json(resultDados)
+    response.status(resultDados.status_code)
+
+})
+
+// DADOS PRODUTO
+
+app.get('/v1/baze/produtos', cors(), async function(request, response, next){
+
+    let dadosProduto = await produtosController.getListarProdutos()
+
+    if(dadosProduto){
+        response.json(dadosProduto)
+        response.status(200)
+    } else{
+        response.json({message: 'NADA ENCONTRADO'})
+        response.status(404)
+    }
+})
+
+app.get('/v1/baze/produto/:id', cors(), async function(request, response, next){
+
+    let idProduto = request.params.id
+
+    let dadosProduto = await produtosController.getBuscarProduto(idProduto)
+
+    if(dadosProduto){
+        response.json(dadosProduto)
+        response.status(200)
+    } else{
+        response.json({message: 'NADA ENCONTRADO'})
+        response.status(404)
+    }
+})
+
+app.post('/v1/baze/produto', cors(), jsonBodyParser, async function(request, response, next){
+
+    let contentType = request.headers['content-type']
+    let dadosBody = request.body
+    let resultDados = await produtosController.setInserirNovoProduto(dadosBody, contentType)  
+    
+    response.json(resultDados)
+    response.status(resultDados.status_code)
+})
+
+app.delete('/v1/baze/produto/:id', cors(), async function(request, response, next){
+
+    let idProduto = request.params.id
+    let dadosProduto = await produtosController.setExcluirProduto(idProduto)
+
+    response.json(dadosProduto)
+    response.status(200)
+})
+
+app.put('/v1/baze/atualizar/produto/:id', cors(), jsonBodyParser, async function(request, response, next){
+
+    let idProduto = request.params.id
+    let contentType = request.headers['content-type']
+    let dadosBody = request.body
+    let resultDados = await produtosController.setAtualizarProduto(idProduto, contentType, dadosBody)
 
     response.json(resultDados)
     response.status(resultDados.status_code)
