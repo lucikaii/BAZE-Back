@@ -47,6 +47,28 @@ const getBuscarProduto = async function(idProduto){
     }
 }
 
+const getBuscarProdutoPorGenero = async function(idGenero){
+
+    let jsonProdutos = {}
+    let dadosProduto = await produtosDAO.selectByGeneroProduto(idGenero)
+
+    if(dadosProduto){
+
+        if (dadosProduto.length > 0) {
+
+            jsonProdutos.produtos = dadosProduto
+            jsonProdutos.status_code = 200
+            return jsonProdutos
+            
+        } else {
+            return config.ERROR_NOT_FOUND
+        }
+
+    } else{
+        return config.ERROR_INTERNAL_SERVER_DB
+    }
+}
+
 const setInserirNovoProduto = async function(dadosProduto, contentType){
 
     try {
@@ -88,6 +110,44 @@ const setInserirNovoProduto = async function(dadosProduto, contentType){
         
     } catch (error) {
         return config.ERROR_INTERNAL_SERVER
+    }
+}
+
+const setInserirProdutoGenero = async function(dadosProduto, contentType){
+
+    try {
+        
+        if (String(contentType).toLowerCase() == 'application/json') {
+            
+            let statusValidate = false
+            let jsonProdutoGenero = {}
+
+            if(dadosProduto.id_produto == '' || dadosProduto.id_produto == undefined || dadosProduto.id_produto == null || isNaN(dadosProduto.id_produto) ||
+               dadosProduto.id_genero == '' || dadosProduto.id_genero == undefined || dadosProduto.id_genero == null || isNaN(dadosProduto.id_genero)){
+                return config.ERROR_REQUIRED_FIELDS
+               } else{
+                statusValidate = true
+               }
+
+               if(statusValidate){
+                let novoProdutoGenero = await produtosDAO.insertProdutoGenero(dadosProduto)
+
+                if(novoProdutoGenero){
+                    jsonProdutoGenero.status = config.SUCESS_CREATED_ITEM.status
+                    jsonProdutoGenero.status_code = config.SUCESS_CREATED_ITEM.status_code
+                    jsonProdutoGenero.message = config.SUCESS_CREATED_ITEM.message
+                    jsonProdutoGenero.produto_genero = dadosProduto
+                    jsonProdutoGenero.id = dadosProduto.id
+                    return jsonProdutoGenero
+                } else{
+                    return config.ERROR_INTERNAL_SERVER_DB
+                }
+               }
+        } else {
+            return config.ERROR_CONTENT_TYPE
+        }
+    } catch (error) {
+        return false
     }
 }
 
@@ -138,7 +198,7 @@ const setAtualizarProduto = async function(idProduto, contentType, dadosProduto)
 
                 let novoProduto = await produtosDAO.updateProduto(idProduto, dadosProduto)
 
-                if (jsonNovoProduto) {
+                if (novoProduto) {
 
                     jsonNovoProduto.status = config.SUCCESS_UPDATED_ITEM.status
                     jsonNovoProduto.status_code = config.SUCCESS_UPDATED_ITEM.status_code
@@ -163,7 +223,9 @@ const setAtualizarProduto = async function(idProduto, contentType, dadosProduto)
 module.exports = {
     getListarProdutos,
     getBuscarProduto,
+    getBuscarProdutoPorGenero,
     setInserirNovoProduto,
+    setInserirProdutoGenero,
     setExcluirProduto,
     setAtualizarProduto
 }
